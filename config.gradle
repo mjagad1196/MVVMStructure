@@ -1,0 +1,68 @@
+gradle.properties
+import java.text.SimpleDateFormat
+
+ext {
+    APP_NAME = "MVVM-Structure"
+    APPLICATION_ID = "com.app.mvvm_structure"
+
+    BASE_URL = "https://api.chucknorris.io/jokes/" // Staging
+    //  BASE_URL = "https://www.thehealthiestworkplace.com" // Production
+    // BASE_URL = "http://192.192.6.118:8000" // Local
+
+    //ENDPOINT = BASE_URL + "/api/" // Developer
+}
+
+
+ext {
+    versionMajor = 1
+    versionMinor = 0
+    versionPatch = 0
+    versionBuild = 0
+
+    computeVersionCode = this.&computeVersionCode
+    computeVersionName = this.&computeVersionName
+    analyticsEnabled = this.&analyticsEnabled
+
+    generateName = this.&generateName
+}
+
+
+def computeVersionCode() {
+    return versionMajor * 1000000 + versionMinor * 10000 + versionPatch * 100 + versionBuild
+}
+
+def computeVersionName() {
+    return "${versionMajor}.${versionMinor}.${versionPatch}.${versionBuild}"
+}
+
+static def analyticsEnabled() {
+    return "false"
+}
+
+def generateName(appVariants) {
+    appVariants.all { variant ->
+        variant.outputs.each { output ->
+            def apkName = APP_NAME
+
+            if (variant.buildType.name == "release") {
+                apkName += "_v.${variant.versionName}_" + getDate()
+            } else {
+                apkName += "_debug"
+            }
+
+            def flavors = variant.productFlavors[0]
+            def flavorName = flavors == null || flavors.name == null ? "" : "-" + flavors.name
+
+            apkName += flavorName + ".apk"
+
+            output.outputFileName = new File(apkName)
+            // output.outputFileName =new File("$relativeRootDir", apkName)
+        }
+    }
+}
+
+static def getDate() {
+    def df = new SimpleDateFormat("yyyy-MM-dd") //you can change it
+    df.setTimeZone(TimeZone.getTimeZone("UTC"))
+    return df.format(new Date())
+}
